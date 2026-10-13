@@ -1,7 +1,7 @@
 import torch
 from missing_wedge_ei.data import load_mnist32
 
-x = load_mnist32(train=True, seed=0, rotate=True)
+x = load_mnist32(train=False, seed=0, rotate=True)
 
 def test_form_and_type():
     """Test que le dataset est bien de la forme (N, 1, 32, 32) et de type float32."""
@@ -17,7 +17,7 @@ def test_values_range():
 
 def test_reproducibility():
     """Test que le dataset est reproductible avec le même seed."""
-    x1 = load_mnist32(train=True, seed=0, rotate=True)
-    x2 = load_mnist32(train=True, seed=1, rotate=True)
+    x1 = load_mnist32(train=False, seed=0, rotate=True)
+    x2 = load_mnist32(train=False, seed=1, rotate=True)
     assert torch.equal(x1, x), "Datasets with the same seed are not equal"
     assert torch.equal(x1, x2) == False, "Datasets with different seeds are equal"

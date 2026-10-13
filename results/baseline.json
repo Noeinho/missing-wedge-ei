@@ -1,0 +1,12 @@
+{
+  "method": "baseline",
+  "split": "test",
+  "n_images": 10000,
+  "data_seed": 1,
+  "half_angle_deg": 30.0,
+  "psnr_db": 16.249187469482422,
+  "mse_measured": 8.89098191601725e-16,
+  "mse_missing": 0.027483489364385605,
+  "torch_version": "2.14.1+cpu",
+  "git_commit": "92cf2de9e69a890472f73532df2c996ba78dbefc"
+}

@@ -3,7 +3,10 @@ import math
 from torch.fft import fft2, ifft2
 
 def wedge_mask(n: int, half_angle_deg:float) -> torch.Tensor:
-    """Masque de Fourier du missing wedge. Masque ie des 1 la ou on voit, des 0 la ou la freq est manquante."""
+    """Masque de Fourier du missing wedge. Masque ie des 1 la ou on voit, des 0 la ou la freq est manquante.
+    n : taille de l'image (n x n)
+    half_angle_deg : demi-angle du cône en degrés (angle total = 2 * half_angle_deg)
+    """
     k = torch.fft.fftfreq(n) #donne les n fréquences k/n avec convention centrée en 0
     kx, ky = torch.meshgrid(k, k, indexing="xy") #on crée une grille de fréquences (kx, ky) de shape (n, n).
     
@@ -19,7 +22,9 @@ def wedge_mask(n: int, half_angle_deg:float) -> torch.Tensor:
     return mask
 
 def measure(x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """Applique l'opérateur A, ie supprime les fréquences masquées."""
+    """Applique l'opérateur A, ie supprime les fréquences masquées.
+    x: (B, C, N, N) : batch d'images
+    mask: (N, N) : masque de Fourier du missing wedge"""
     return ifft2(mask * fft2(x)).real #équivaut a une convolution dans l'espace spatial. 
 
 if __name__ == "__main__":
