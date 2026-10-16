@@ -10,7 +10,6 @@ class ConvNet(nn.Module):
         self.residual = residual
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
 
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
         self.conv4 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
