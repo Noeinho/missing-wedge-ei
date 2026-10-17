@@ -7,11 +7,6 @@ import torch.optim as optim
 from missing_wedge_ei.forward_op import measure
 
 
-x_all = load_mnist32(train=True, seed=0)
-x_train = x_all[:55000]
-x_eval = x_all[55000:]
-
-
 def supervised_loss(model, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """MSE entre la reconstruction f(A x) et la vraie image x.
     Il est important que la loss renvoie un tenseur et pas un float, pour qu'il ait une méthode backward.
