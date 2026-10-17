@@ -51,6 +51,16 @@ Because $A$ is an orthogonal projection, the squared error splits exactly into a
 
 Digits in MNIST are all upright, so the rotation-stability assumption is false for the raw dataset. `data.py` therefore applies to each image a random number of quarter turns (0 to 3, fixed seed), which makes the dataset exactly stable under 90-degree rotation.
 
+### The equivariant loss
+
+Consistency alone ($\lVert A f(y) - y\rVert^2$) says nothing about the missing cone: the identity map $f(y)=y$ already satisfies it. The equivariant loss adds a second term that is, in effect, **supervised learning on targets built from the model's own output**. Let $x_1 = f(y)$, let $x_2 = g\,x_1$ with $g$ a 90° or 270° rotation, and let $y_2 = A x_2$:
+
+$$L(\theta) = \lVert A f(y) - y\rVert^2 + \alpha\,\lVert f(y_2) - x_2\rVert^2 .$$
+
+Rotating by $g$ moves the missing cone $C$ onto a different cone. The frequencies that $y$ showed (and that $x_1$ therefore contains as true content, when the consistency term is satisfied) land inside $C$ in $x_2$, which is exactly where $A$ hides them from $y_2$. The pair $(y_2, x_2)$ is thus a genuine "fill the missing cone" training example: the input lacks the content of $C$, while the target contains real, rotated, measured content there. If $f$ were perfect, $x_1 = x$ and this term would be plain supervised training on rotated images; in practice the targets are only contaminated by $f$'s own guesses inside the rotated cone, which $y_2$ keeps visible and $f$ can simply copy. Since $y$ and $y_2$ have the same format (an image with an empty cone), the same network learns to fill the cone of the real measurement. With `detach=True`, $x_2$ is treated as a constant pseudo-label.
+
+This relies on the set of images being stable under 90° rotations (hence the random quarter-turns applied in `data.py`) and on the rotated cone not overlapping $C$ (half-angle below 45°). Rotations by 180° are not used: the mask is symmetric, so they reveal nothing new. The argument is a heuristic with no guarantee of exact recovery; whether it helps in practice is what the experiments below test.
+
 ## Research question
 
 Without complete images, does equivariance bring anything over consistency alone, and how far is it from the supervised upper reference?
