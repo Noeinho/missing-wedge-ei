@@ -1,0 +1,37 @@
+{
+  "variant": "residual",
+  "alpha": 10.0,
+  "detach": true,
+  "epochs": 5,
+  "lr": 0.001,
+  "batch_size": 128,
+  "seed": 0,
+  "final_test": false,
+  "method": "equivariant",
+  "data_seed": 0,
+  "half_angle_deg": 30.0,
+  "n_train": 55000,
+  "n_val": 5000,
+  "baseline_val_psnr_db": 16.379261016845703,
+  "val_psnr_before_training_db": 16.379261875152586,
+  "val_mse_measured": 0.001050541631411761,
+  "val_mse_missing": 0.0011112369596958161,
+  "history": {
+    "train_loss": [
+      0.0958216082545844,
+      0.035453180822730065,
+      0.024090275238589805,
+      0.019272650479457594,
+      0.016177791600877588
+    ],
+    "val_psnr": [
+      25.539840698242188,
+      27.690403175354003,
+      29.03300323486328,
+      29.729249954223633,
+      27.27441997528076
+    ]
+  },
+  "seconds_total": 43377.02703619999,
+  "torch_version": "2.14.1+cpu"
+}
