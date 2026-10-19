@@ -2,7 +2,7 @@
 
 A small PyTorch study of **equivariant imaging** on a toy version of the cryo-electron-tomography *missing wedge* problem. It is inspired by the equivariant imaging framework of Chen, Tachella and Davies (ICCV 2021). The setting here is much simpler than real cryo-ET: 2D images, no noise, MNIST digits.
 
-**Status:** finished toy study. The operator, data loader, metrics, model and the four methods are implemented and tested; results over 3 seeds are reported below.
+**Status:** finished toy study. The operator, data loader, metrics, model and training loop are tested; the four methods are implemented (the losses have no dedicated tests); results over 3 seeds are reported below.
 
 ## The idea
 
@@ -20,10 +20,10 @@ The microscope is replaced by a fixed linear operator $A$, and the 3D volume by 
 
 An image can be written as a sum of waves, and its Fourier transform says how much of each wave it contains. A wave has a size (frequency) and an orientation, given by a vector $(k_x, k_y)$. The operator $A$ removes all waves whose vector lies in a **double cone** of half-angle 30 degrees around the vertical frequency axis. It keeps every other wave, and it keeps the zero frequency, which is the mean brightness of the image. The measurement is $y = Ax$.
 
-Properties, each covered by a test in `tests/`:
-- $A$ is a projection: $A(Ax) = Ax$, because the mask contains only 0 and 1.
-- The mask is symmetric ($M(-k) = M(k)$), so the output is real.
-- The mean of the image is preserved.
+Properties:
+- $A$ is a projection: $A(Ax) = Ax$, because the mask contains only 0 and 1 (tested).
+- The mean of the image is preserved (tested).
+- The mask is symmetric ($M(-k) = M(k)$), so the output is real (not tested; `measure` simply takes the real part).
 
 ![The measurement operator](figures/operator.png)
 
@@ -93,7 +93,7 @@ there is no checkpoint selection.
 
 ![Reconstructions](figures/reconstructions.png)
 
-*First six test images: truth, measurement, equivariant reconstruction, error. The weights come from a re-run of the seed-0 equivariant configuration: training was not bit-for-bit reproducible, and that re-run reached 35.61 dB on the test set against 34.18 dB for the run reported in the table. The table uses the original runs only.*
+*First six test images: truth, measurement, equivariant reconstruction, error. The weights come from a re-run of the seed-0 equivariant configuration, which reached 35.61 dB on the test set against 34.18 dB for the run reported in the table. The table uses the original runs only.*
 
 ### Observations
 
@@ -155,7 +155,7 @@ there is no checkpoint selection.
 
 ```bash
 uv sync
-uv run pytest                                     # tests (downloads MNIST on first run)
+uv run pytest                                     # tests (downloads MNIST into data/ on first run)
 uv run python scripts/baseline.py                 # baseline PSNR
 uv run python scripts/run_experiments.py          # runs listed in RUNS (edit the file)
 uv run python scripts/make_table.py               # results/summary.md
@@ -163,6 +163,19 @@ uv run python scripts/make_figure.py              # figures/reconstructions.png
 ```
 
 Weights are written to `runs/` (ignored by Git); one JSON per run goes to `results/`.
+`make_figure.py` needs the weights of the seed-0 equivariant run, so run `run_experiments.py` first.
+MNIST is stored in `data/` at the repository root, whatever the working directory.
+
+Notes on the repository:
+- `results/` holds the final runs (`*_final_seed*.json`, used by the table) and the shorter
+  tuning runs behind the Observations. Tuning file names are not fully uniform because
+  the naming scheme evolved. A few `seconds_total` values (for example 8675 s per epoch)
+  are inflated, most likely because the machine was suspended during the run.
+- `scripts/train_supervised.py` and `scripts/overfit_batch.py` are early scripts (first
+  supervised run, and a check that the model can memorise 64 images). They are not
+  needed to reproduce the table.
+- `uv.lock` pins the PyTorch version used here (CPU build on Windows). On Linux, `uv sync`
+  may download a much larger CUDA build.
 
 ## Reference
 

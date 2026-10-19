@@ -1,11 +1,16 @@
+from pathlib import Path
+
 import torch
 import torchvision
 from torchvision.transforms import ToTensor
 import torch.nn.functional as F
 
 
+DATA_ROOT = Path(__file__).resolve().parents[2] / "data"  # repository root, not the cwd
+
+
 def load_mnist32(train: bool, seed: int = 0, rotate: bool = True,
-                 root: str = "data") -> torch.Tensor:
+                 root: str = str(DATA_ROOT)) -> torch.Tensor:
     """MNIST as (N, 1, 32, 32), values in [0, 1].
 
     If rotate=True, each image gets k quarter turns, k drawn uniformly in

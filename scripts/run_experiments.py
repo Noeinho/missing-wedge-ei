@@ -53,6 +53,18 @@ RUNS = [
     for s in (0, 1, 2)
 ] + [
     {
+        "method": "equivariant",
+        "variant": "residual",
+        "alpha": 3.0,
+        "detach": True,
+        "epochs": 20,
+        "lr": 3e-3,
+        "seed": s,
+        "final_test": True,
+    }
+    for s in (0, 1, 2)
+] + [
+    {
         "method": "consistency",
         "variant": "direct",
         "epochs": 20,

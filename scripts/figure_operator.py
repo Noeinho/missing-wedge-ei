@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torchvision
 from torchvision.transforms import ToTensor
 
+from missing_wedge_ei.data import DATA_ROOT
 from missing_wedge_ei.forward_op import measure, wedge_mask
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -16,7 +17,7 @@ N_IMAGES = 3
 
 def main():
     dataset = torchvision.datasets.MNIST(
-        root=str(ROOT / "data"), train=False, download=True, transform=ToTensor()
+        root=str(DATA_ROOT), train=False, download=True, transform=ToTensor()
     )
     x = torch.stack([dataset[i][0] for i in range(N_IMAGES)])  # (3, 1, 28, 28)
     x = F.pad(x, (2, 2, 2, 2))                                 # (3, 1, 32, 32)
