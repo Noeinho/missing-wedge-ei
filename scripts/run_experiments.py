@@ -43,11 +43,20 @@ DEFAULTS = {
 # ou "equivariant". Le reste remplace les valeurs de DEFAULTS.
 RUNS = [
     {
-        "method": "equivariant",
+        "method": "supervised",
         "variant": "residual",
-        "alpha": 3.0,
-        "lr": 3e-3,
         "epochs": 20,
+        "lr": 3e-3,
+        "seed": s,
+        "final_test": True,
+    }
+    for s in (0, 1, 2)
+] + [
+    {
+        "method": "consistency",
+        "variant": "direct",
+        "epochs": 20,
+        "lr": 3e-3,
         "seed": s,
         "final_test": True,
     }
