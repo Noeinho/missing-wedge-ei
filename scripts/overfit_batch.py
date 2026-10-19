@@ -1,5 +1,5 @@
-"""Test de débogage : le modèle et la boucle savent-ils mémoriser 64 images ?
-Si la perte ne baisse pas ici, il y a un bug.
+"""Sanity check: can the model and the training loop memorise 64 images?
+If the loss does not decrease here, there is a bug.
 """
 
 import torch
@@ -12,10 +12,10 @@ from missing_wedge_ei.train import supervised_loss, train
 
 
 def overfit_batch(x, mask, residual, epochs=300, lr=1e-3, seed=0):
-    baseline = psnr(measure(x, mask), x)  # PSNR avant tout entraînement
+    baseline = psnr(measure(x, mask), x)  # PSNR before any training
     torch.manual_seed(seed)
     model = ConvNet(residual=residual)
-    # batch_size = nombre d'images : une époque = un seul pas sur le même lot.
+    # batch_size = number of images: one epoch is a single step on the same batch.
     history = train(
         model,
         supervised_loss,
@@ -38,8 +38,8 @@ if __name__ == "__main__":
         baseline, hist = overfit_batch(x, mask, residual)
         losses, psnrs = hist["train_loss"], hist["val_psnr"]
         print(f"\nresidual={residual}")
-        print(f"  PSNR de la baseline sur ces images : {baseline:.2f} dB")
-        print(f"  perte : {losses[0]:.5f} -> {losses[-1]:.5f}")
+        print(f"  baseline PSNR on these images : {baseline:.2f} dB")
+        print(f"  loss: {losses[0]:.5f} -> {losses[-1]:.5f}")
         print(
-            f"  PSNR  : {psnrs[0]:.2f} -> {psnrs[-1]:.2f} dB (sur les images d'entraînement)"
+            f"  PSNR: {psnrs[0]:.2f} -> {psnrs[-1]:.2f} dB (on the training images)"
         )

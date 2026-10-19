@@ -1,4 +1,4 @@
-"""Premier entraînement supervisé : entraîné sur le train, évalué sur la validation."""
+"""First supervised training run: trained on the train split, evaluated on validation."""
 
 import argparse
 import json
@@ -14,15 +14,15 @@ from missing_wedge_ei.model import ConvNet
 from missing_wedge_ei.train import supervised_loss, train
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_SEED = 0  # rotations des données : fixées une fois pour toutes
+DATA_SEED = 0  # rotations of the data: fixed once and for all
 HALF_ANGLE = 30.0
 N_TRAIN = 55_000
 
 
 def train_supervised(x_train, x_val, mask, residual, epochs, lr, batch_size, seed):
-    torch.manual_seed(seed)  # même initialisation à chaque appel
+    torch.manual_seed(seed)  # same initialisation at every call
     model = ConvNet(residual=residual)
-    baseline = psnr(measure(x_val, mask), x_val)  # PSNR avant tout entraînement
+    baseline = psnr(measure(x_val, mask), x_val)  # PSNR before any training
     start = time.perf_counter()
     history = train(
         model,
@@ -70,15 +70,15 @@ def main():
         losses, psnrs = hist["train_loss"], hist["val_psnr"]
         per_epoch = seconds / args.epochs
         print(f"\n{variant} (seed {args.seed})")
-        print(f"  PSNR de la baseline sur la validation : {baseline:.2f} dB")
-        print(f"  perte d'entraînement : {losses[0]:.5f} -> {losses[-1]:.5f}")
+        print(f"  baseline PSNR on validation : {baseline:.2f} dB")
+        print(f"  training loss: {losses[0]:.5f} -> {losses[-1]:.5f}")
         print(
-            f"  PSNR de validation   : {psnrs[0]:.2f} -> {psnrs[-1]:.2f} dB "
-            f"({psnrs[-1] - baseline:+.2f} dB par rapport à la baseline)"
+            f"  validation PSNR: {psnrs[0]:.2f} -> {psnrs[-1]:.2f} dB "
+            f"({psnrs[-1] - baseline:+.2f} dB vs baseline)"
         )
         print(
-            f"  temps : {seconds:.0f} s au total, {per_epoch:.0f} s par époque "
-            f"(validation comprise)"
+            f"  time: {seconds:.0f} s in total, {per_epoch:.0f} s per epoch "
+            f"(validation included)"
         )
 
         result = {
@@ -104,7 +104,7 @@ def main():
         name = f"supervised_{variant}_seed{args.seed}"
         (results_dir / f"{name}.json").write_text(json.dumps(result, indent=2))
 
-        runs_dir = ROOT / "runs"  # ignoré par Git
+        runs_dir = ROOT / "runs"  # ignored by Git
         runs_dir.mkdir(exist_ok=True)
         torch.save(model.state_dict(), runs_dir / f"{name}.pt")
 

@@ -7,7 +7,7 @@ SEED = 1
 N = 32
 
 
-@pytest.fixture(autouse=True)  # so its called between every test exec.
+@pytest.fixture(autouse=True)  # re-seed before every test
 def seed_everything():
     torch.manual_seed(SEED)
 
@@ -15,7 +15,7 @@ def seed_everything():
 @pytest.mark.parametrize("batch_size", [1, 4])
 @pytest.mark.parametrize(
     "residual", [True, False]
-)  # decorater tq que chaque test soit appelé pour chaque valeur listée ici.
+)  # run the test for each listed value
 def test_ConvNet_shape(batch_size, residual):
     X_batch = torch.rand(batch_size, 1, N, N)
     conv_model = ConvNet(residual=residual)
@@ -27,7 +27,7 @@ def test_ConvNet_residual_is_identity():
     X = torch.rand(1, 1, N, N)
     assert torch.equal(
         conv_model(X), X
-    )  # appliquer une instance de classe appelle automatiquement forward.
+    )  # calling the module runs forward
 
 
 def test_ConvNet_no_residual_isnot_identity():
@@ -35,7 +35,7 @@ def test_ConvNet_no_residual_isnot_identity():
     X = torch.rand(1, 1, N, N)
     assert not torch.equal(
         conv_model(X), X
-    )  # appliquer une instance de classe appelle automatiquement forward.
+    )  # calling the module runs forward
 
 
 @pytest.mark.parametrize("residual", [True, False])

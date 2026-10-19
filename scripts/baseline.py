@@ -10,7 +10,7 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def git_commit() -> str: #The idea is to be able to retrieve what version gave the result we are saving.
+def git_commit() -> str:  # lets a saved result be traced back to the code version
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -19,7 +19,8 @@ def git_commit() -> str: #The idea is to be able to retrieve what version gave t
         return "unknown"
 
 
-#Baseline gives the error between original one and measured one without further reconstruction. It's a lower bound.
+# The baseline is the error between the original image and its measurement,
+# without any reconstruction (x_hat = y).
 
 def main():
     SEED = 1
@@ -30,7 +31,7 @@ def main():
     y = measure(x, MASK)
     print("PSNR baseline (dB) :")
     psnr_value = psnr(y, x)
-    print(psnr_value)  # should be around 17.5 dB
+    print(psnr_value)
     print("MSE baseline (measured, missing) :")
     measured, missing = split_mse(y, x, MASK)
     print(measured, missing, measured + missing)
@@ -39,7 +40,7 @@ def main():
     "method": "baseline",
     "split": "test",
     "n_images": int(x.shape[0]),
-    "data_seed": SEED,                     # la graine passée à load_mnist32
+    "data_seed": SEED,                     # seed passed to load_mnist32
     "half_angle_deg": HALF_ANGLE,
     "psnr_db": float(psnr_value),
     "mse_measured": float(measured),
@@ -50,7 +51,7 @@ def main():
     out = ROOT / "results" / "baseline.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(result, indent=2))
-    print("résultats sauvegardés dans", out)
+    print("results saved to", out)
 
 if __name__ == "__main__":
     main()

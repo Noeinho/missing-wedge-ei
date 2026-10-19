@@ -6,11 +6,11 @@ import torch.nn.functional as F
 
 def load_mnist32(train: bool, seed: int = 0, rotate: bool = True,
                  root: str = "data") -> torch.Tensor:
-    """MNIST en (N, 1, 32, 32), valeurs dans [0, 1].
+    """MNIST as (N, 1, 32, 32), values in [0, 1].
 
-    Si rotate=True, chaque image subit k quarts de tour, k tiré uniformément
-    dans {0, 1, 2, 3} : la loi du jeu de données est alors exactement
-    invariante par rotation de 90 degrés.
+    If rotate=True, each image gets k quarter turns, k drawn uniformly in
+    {0, 1, 2, 3}: the dataset distribution is then exactly invariant under
+    90-degree rotation.
     """
     dataset = torchvision.datasets.MNIST(
         root=root, train=train, download=True, transform=ToTensor()
@@ -23,7 +23,7 @@ def load_mnist32(train: bool, seed: int = 0, rotate: bool = True,
         k = torch.randint(0, 4, (x.shape[0],), generator=g)        # (N,)
         out = x.clone()
         for r in [1, 2, 3]:
-            idx = k == r                                           # masque booléen (N,)
+            idx = k == r                                           # boolean mask (N,)
             out[idx] = torch.rot90(x[idx], r, dims=(2, 3))
         x = out
     return x
@@ -32,7 +32,7 @@ def load_mnist32(train: bool, seed: int = 0, rotate: bool = True,
 if __name__ == "__main__":
     x = load_mnist32(train=True, seed=0, rotate=True)
     print(x.shape)
-    #Affichage d'une grille de 10 images:
+    # display a grid of 10 images
     import matplotlib.pyplot as plt
     plt.figure(figsize=(10, 1))
     for i in range(10):

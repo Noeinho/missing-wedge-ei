@@ -1,11 +1,11 @@
-"""Lance une série d'entraînements et enregistre un JSON par run.
+"""Run a series of trainings and save one JSON per run.
 
-Pour changer les expériences, modifier la liste RUNS en bas du fichier.
-Chaque run écrit results/<nom>.json (versionné) et runs/<nom>.pt (ignoré par Git).
-Relancer une même configuration avec la même graine écrase ses fichiers.
+To change the experiments, edit the RUNS list below.
+Each run writes results/<name>.json (tracked) and runs/<name>.pt (ignored by Git).
+Re-running a configuration with the same seed overwrites its files.
 
-final_test=True évalue aussi le jeu de test : à ne faire qu'une seule fois par
-configuration finale, après les réglages sur la validation.
+final_test=True also evaluates the test set: do this only once per final
+configuration, after tuning on the validation set.
 """
 
 import json
@@ -22,16 +22,16 @@ from missing_wedge_ei.model import ConvNet
 from missing_wedge_ei.train import evaluate, supervised_loss, train
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_SEED = 0  # rotations du jeu d'entraînement et de validation
-TEST_SEED = 1  # rotations du jeu de test
+DATA_SEED = 0  # rotations of the train and validation sets
+TEST_SEED = 1  # rotations of the test set
 HALF_ANGLE = 30.0
 N_TRAIN = 55_000
 
-# Valeurs utilisées quand un run ne les précise pas.
+# Values used when a run does not specify them.
 DEFAULTS = {
-    "variant": "direct",  # "direct" ou "residual"
-    "alpha": 1.0,  # poids du terme équivariant (méthode equivariant)
-    "detach": True,  # figer la cible tournée (méthode equivariant)
+    "variant": "direct",  # "direct" or "residual"
+    "alpha": 1.0,  # weight of the equivariant term (equivariant method)
+    "detach": True,  # treat the rotated target as a constant (equivariant method)
     "epochs": 5,
     "lr": 1e-3,
     "batch_size": 128,
@@ -39,8 +39,8 @@ DEFAULTS = {
     "final_test": False,
 }
 
-# Les runs à lancer. "method" est obligatoire : "supervised", "consistency"
-# ou "equivariant". Le reste remplace les valeurs de DEFAULTS.
+# The runs to launch. "method" is required: "supervised", "consistency" or
+# "equivariant". The other keys override DEFAULTS.
 RUNS = [
     {
         "method": "supervised",
@@ -65,7 +65,7 @@ RUNS = [
 
 
 def split_errors(model, x, mask, batch_size=500):
-    """(MSE dans la partie mesurée, MSE dans le cône), moyennées sur x."""
+    """(MSE on the measured part, MSE inside the cone), averaged over x."""
     model.eval()
     measured = 0.0
     missing = 0.0
@@ -124,16 +124,16 @@ def run(cfg, x_train, x_val, mask):
 
     name = run_name(cfg)
     print(f"\n{name}")
-    print(f"  PSNR de la baseline (validation) : {baseline:.2f} dB")
-    print(f"  PSNR de validation avant entraînement : {epoch0:.2f} dB")
+    print(f"  baseline PSNR (validation): {baseline:.2f} dB")
+    print(f"  validation PSNR before training: {epoch0:.2f} dB")
     print(
-        f"  PSNR de validation final : {val_psnr:.2f} dB "
-        f"({val_psnr - baseline:+.2f} dB par rapport à la baseline)"
+        f"  final validation PSNR: {val_psnr:.2f} dB "
+        f"({val_psnr - baseline:+.2f} dB vs baseline)"
     )
     print(
-        f"  MSE validation : mesurée {val_measured:.2e}, dans le cône {val_missing:.2e}"
+        f"  validation MSE: measured {val_measured:.2e}, in the cone {val_missing:.2e}"
     )
-    print(f"  temps : {seconds:.0f} s ({seconds / cfg['epochs']:.0f} s par époque)")
+    print(f"  time: {seconds:.0f} s ({seconds / cfg['epochs']:.0f} s per epoch)")
 
     result = dict(cfg)
     result.update(
@@ -170,14 +170,14 @@ def run(cfg, x_train, x_val, mask):
 
 
 if __name__ == "__main__":
-    # Vérifier tout avant de charger les données : une faute de frappe dans RUNS
-    # (par exemple "epoch" au lieu de "epochs") serait sinon ignorée sans message.
+    # Check everything before loading the data: a typo in RUNS (for example
+    # "epoch" instead of "epochs") would otherwise be silently ignored.
     configs = []
     for overrides in RUNS:
         assert "method" in overrides, overrides
         unknown = set(overrides) - set(DEFAULTS) - {"method"}
-        assert not unknown, f"réglages inconnus : {unknown}"
-        cfg = {**DEFAULTS, **overrides}  # les valeurs de overrides l'emportent
+        assert not unknown, f"unknown settings: {unknown}"
+        cfg = {**DEFAULTS, **overrides}  # values in overrides take precedence
         assert cfg["method"] in ("supervised", "consistency", "equivariant"), cfg
         assert cfg["variant"] in ("direct", "residual"), cfg
         configs.append(cfg)

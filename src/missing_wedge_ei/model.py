@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class ConvNet(nn.Module):
     def __init__(self, residual: bool = True):
-        """Residual = true si on veut faire apprendre au réseau la partie manquante uniquement."""
+        """residual=True: the network learns a correction added to its input y."""
         super().__init__()
 
         self.residual = residual
@@ -17,11 +17,8 @@ class ConvNet(nn.Module):
         self.relu = nn.ReLU()
         if residual:
             nn.init.zeros_(self.conv5.weight)
-            nn.init.zeros_(
-                self.conv5.bias
-            )  # met à 0 poids et biais de la dernière couche. le _ est la convention pytorch pour modifier
-            # au lieu de renvoyer un objet différent.
-            # Cela signifie qu'initialement, 0 sort de residual.
+            nn.init.zeros_(self.conv5.bias)
+            # the last layer starts at zero, so the network is initially the identity
 
     def forward(self, y: torch.Tensor) -> torch.Tensor:
         x = self.relu(self.conv1(y))
@@ -29,6 +26,4 @@ class ConvNet(nn.Module):
         x = self.relu(self.conv3(x))
         x = self.relu(self.conv4(x))
         x = self.conv5(x)
-        return (
-            y + x if self.residual else x
-        )  # si residual, le x appris par le réseau n'est que la partie manquante. on l'ajoute à l'entrée.
+        return y + x if self.residual else x  # residual: x is a correction added to the input

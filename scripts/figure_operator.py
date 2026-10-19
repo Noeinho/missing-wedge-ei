@@ -18,19 +18,19 @@ def main():
     dataset = torchvision.datasets.MNIST(
         root=str(ROOT / "data"), train=False, download=True, transform=ToTensor()
     )
-    x = torch.stack([dataset[i][0] for i in range(N_IMAGES)])  # (3, 1, 28, 28) (alors que torch.cat donnerait (3, 28, 28)
+    x = torch.stack([dataset[i][0] for i in range(N_IMAGES)])  # (3, 1, 28, 28)
     x = F.pad(x, (2, 2, 2, 2))                                 # (3, 1, 32, 32)
 
     mask = wedge_mask(N, HALF_ANGLE)
     y = measure(x, mask)
-    d = x - y #partie perdue
+    d = x - y # part removed by A
 
-    print("fraction de fréquences gardées :", mask.mean().item())
-    print("moyenne de x :", x.mean(dim=(1, 2, 3)))
-    print("moyenne de y :", y.mean(dim=(1, 2, 3)))
-    print("min de x, min de y :", x.min().item(), y.min().item())
+    print("fraction of frequencies kept:", mask.mean().item())
+    print("mean of x:", x.mean(dim=(1, 2, 3)))
+    print("mean of y:", y.mean(dim=(1, 2, 3)))
+    print("min of x, min of y:", x.min().item(), y.min().item())
 
-    mask_display = torch.fft.fftshift(mask)  # shift seulement la liste pour affichage (fréq 0 au milieu de la liste)
+    mask_display = torch.fft.fftshift(mask)  # shift for display only (zero frequency at the centre)
     vmin = min(x.min().item(), y.min().item())
     vmax = max(x.max().item(), y.max().item())
     dmax = d.abs().max().item()
@@ -43,13 +43,13 @@ def main():
         axes[i, 3].imshow(d[i, 0], cmap="RdBu", vmin=-dmax, vmax=dmax)
         for ax in axes[i]:
             ax.axis("off")
-    for ax, title in zip(axes[0], ["x", "masque (fftshift)", "y = A x", "x - y"]):
+    for ax, title in zip(axes[0], ["x", "mask (fftshift)", "y = A x", "x - y"]):
         ax.set_title(title)
 
     out = ROOT / "figures" / "operator.png"
     out.parent.mkdir(exist_ok=True)
     fig.savefig(out, dpi=150, bbox_inches="tight")
-    print("figure sauvegardée dans", out)
+    print("figure saved to", out)
     plt.show()
 
 

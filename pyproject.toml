@@ -1,10 +1,10 @@
 [project]
 name = "missing-wedge-ei"
 version = "0.1.0"
-description = "Add your description here"
+description = "Equivariant imaging on a toy missing-wedge problem (PyTorch)"
 readme = "README.md"
 authors = [
-    { name = "Noeinho", email = "nosol2004@gmail.com" }
+    { name = "Noeinho" }
 ]
 requires-python = ">=3.13"
 dependencies = [

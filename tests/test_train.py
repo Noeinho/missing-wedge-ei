@@ -16,22 +16,22 @@ MASK = wedge_mask(N, 30.0)
 
 @pytest.fixture(autouse=True)
 def seed_everything():
-    """Même graine avant chaque test, quel que soit l'ordre d'exécution."""
+    """Same seed before each test, whatever the execution order."""
     torch.manual_seed(SEED)
 
 
 @pytest.fixture(scope="module")
 def data():
-    """256 vraies images MNIST (jeu de test, avec rotations), chargées une seule fois.
+    """256 real MNIST images (test split, with rotations), loaded once.
 
-    Des images structurées, pas du bruit : du bruit n'a rien à apprendre, donc la
-    perte pourrait ne pas baisser même avec un code correct.
+    Structured images rather than noise: noise has nothing to learn, so the loss
+    might not decrease even with correct code.
     """
     return load_mnist32(train=False, seed=1)[:256]
 
 
 def _run(model, data, epochs, loss_fn=supervised_loss, n_train=128, **kwargs):
-    """Entraîne sur data[:n_train], valide sur les 64 images suivantes."""
+    """Train on data[:n_train], validate on the next 64 images."""
     x_train = data[:n_train]
     x_val = data[n_train : n_train + 64]
     return train(model, loss_fn, x_train, x_val, MASK, epochs, **kwargs)
@@ -43,7 +43,7 @@ def _run(model, data, epochs, loss_fn=supervised_loss, n_train=128, **kwargs):
 
 
 def test_evaluate_of_zero_init_model_equals_baseline(data):
-    # 200 images et batch_size=64 : lots de 64, 64, 64 et 8 (teste le dernier lot).
+    # 200 images with batch_size=64: batches of 64, 64, 64 and 8 (tests the last batch).
     x = data[:200]
     expected = psnr(measure(x, MASK), x)
     got = evaluate(ConvNet(residual=True), x, MASK, batch_size=64)
@@ -59,7 +59,7 @@ def test_evaluate_restores_the_mode_of_the_model(data, was_training):
 
 
 # --------------------------------------------------------------------------- #
-# train : structure
+# train: structure
 # --------------------------------------------------------------------------- #
 
 
@@ -77,7 +77,7 @@ def test_loss_function_receives_batches_not_the_whole_set(data):
         sizes.append(xb.shape[0])
         return supervised_loss(model, xb, mask)
 
-    # 100 = 3 * 32 + 4 : le dernier lot est plus petit.
+    # 100 = 3 * 32 + 4: the last batch is smaller.
     _run(
         ConvNet(residual=True), data, epochs=1, loss_fn=spy, n_train=100, batch_size=32
     )
@@ -96,7 +96,7 @@ def test_every_training_image_is_seen_exactly_once_per_epoch(data):
     )
     seen = torch.cat(batches)
     assert seen.shape[0] == 100
-    # Même multiensemble d'images (comparaison par la somme des pixels, triée).
+    # Same multiset of images (compared through sorted pixel sums).
     assert torch.allclose(
         seen.sum(dim=(1, 2, 3)).sort().values,
         data[:100].sum(dim=(1, 2, 3)).sort().values,
@@ -104,7 +104,7 @@ def test_every_training_image_is_seen_exactly_once_per_epoch(data):
 
 
 # --------------------------------------------------------------------------- #
-# train : l'optimisation fonctionne
+# train: optimisation works
 # --------------------------------------------------------------------------- #
 
 
@@ -122,8 +122,8 @@ def test_parameters_change_during_training(data):
 
 
 def test_zero_learning_rate_leaves_parameters_unchanged(data):
-    # Attrape un lr ignoré (écrit en dur dans l'optimiseur).
-    model = ConvNet(residual=False)  # poids non nuls
+    # Catches an ignored lr (hard-coded in the optimizer).
+    model = ConvNet(residual=False)  # non-zero weights
     before = copy.deepcopy(model.state_dict())
     _run(model, data, epochs=1, lr=0.0, batch_size=32)
     after = model.state_dict()
@@ -132,12 +132,12 @@ def test_zero_learning_rate_leaves_parameters_unchanged(data):
 
 
 # --------------------------------------------------------------------------- #
-# train : reproductibilité et graine
+# train: reproducibility and seed
 # --------------------------------------------------------------------------- #
 
 
 def _history_for(data, shuffle_seed):
-    torch.manual_seed(SEED)  # même initialisation du modèle
+    torch.manual_seed(SEED)  # same model initialisation
     model = ConvNet(residual=True)
     return _run(model, data, epochs=2, batch_size=32, seed=shuffle_seed)
 
@@ -150,7 +150,7 @@ def test_same_seed_gives_same_history(data):
 
 
 def test_shuffle_seed_is_actually_used(data):
-    # Attrape un argument seed ignoré : deux mélanges différents, deux trajectoires.
+    # Catches an ignored seed argument: two different shuffles, two trajectories.
     h1 = _history_for(data, shuffle_seed=0)
     h2 = _history_for(data, shuffle_seed=1)
     assert h1["train_loss"] != h2["train_loss"]
