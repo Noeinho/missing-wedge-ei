@@ -25,6 +25,10 @@ Properties, each covered by a test in `tests/`:
 - The mask is symmetric ($M(-k) = M(k)$), so the output is real.
 - The mean of the image is preserved.
 
+![The measurement operator](figures/operator.png)
+
+*Three test digits. Columns: image x, Fourier mask (zero frequency at the centre), measurement y = Ax, and the part removed by A (x - y).*
+
 ## Why $A$ cannot simply be inverted
 
 Two different images can give exactly the same measurement: it is enough that they differ only by waves inside the cone, which $A$ does not see. No formula can recover $x$ from $y$. Filling the cone requires a prior on what plausible images look like, and a neural network $f$ can learn such a prior.
